@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Inspectr - Check your website for publishing requirements",
-  description: "Analyze your website for meta tags, favicons, SEO requirements, and more that are commonly forgotten before publishing",
+  title: "Inspectr | A little clarity before you launch",
+  description:
+    "Analyze your website for meta tags, favicons, SEO requirements, and more that are commonly forgotten before publishing",
   keywords: "website analyzer, SEO check, metadata analyzer, web audit",
 };
 
@@ -28,6 +29,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
         {children}
       </body>
     </html>

@@ -1,127 +1,44 @@
-# Inspectr - Website Analyzer
+# Inspectr
 
-Inspectr is a modern, open-source website analyzer that helps you ensure your website is production-ready. It checks for SEO essentials, performance optimizations, metadata, and more, providing a comprehensive report in seconds.
+A small website checker for the details that are easy to miss before launch. Enter a public website URL, review the findings, and export a JSON report.
 
-## Features
-- **SEO Analysis**: Checks for meta tags, keywords, canonical URLs, and more.
-- **Performance Insights**: Analyzes HTML size, caching headers, and compression.
-- **Social Media Readiness**: Validates Open Graph and Twitter metadata.
-- **Security Checks**: Ensures HTTPS, Content Security Policy, and other headers are in place.
-- **AI Integration**: Detects AI-related meta tags and structured data.
-- **Responsive Design**: Verifies viewport and language settings.
+## Local development
 
-## Tech Stack
-- **Frontend**: [Next.js](https://nextjs.org), React, Tailwind CSS
-- **Backend**: Node.js, Next.js API Routes
-- **Parsing**: [Cheerio](https://cheerio.js.org) for HTML parsing, [JSDOM](https://github.com/jsdom/jsdom) for DOM manipulation
-- **Styling**: Tailwind CSS with custom gradients and glass morphism
+Use Node.js 20 or later.
 
-## Getting Started
-
-### Prerequisites
-- Node.js (v16 or later)
-- npm, yarn, or pnpm
-
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/inspectr.git
-   cd inspectr
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
-   ```
-
-### Running Locally
-Start the development server:
-```bash
+```sh
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the app.
+Open http://localhost:3000. For another port, run `npm run dev -- --port 3100`.
 
-### Building for Production
-To build the app for production:
-```bash
+```sh
 npm run build
-```
-
-To start the production server:
-```bash
 npm start
+npm run lint
+npm test
 ```
 
-## How It Works
+`lint` runs TypeScript validation. `test` runs focused analysis and network restriction regression checks.
 
-### Overview
-Inspectr analyzes websites by fetching their HTML and running various checks using both server-side and client-side tools. The results are displayed in a modern, user-friendly interface.
+## What it does
 
-### Key Components
-1. **API Route** (`/api/analyze`):
-   - Fetches the website's HTML using `fetch`.
-   - Parses the HTML using `Cheerio` and `JSDOM`.
-   - Runs checks for metadata, performance, security, and more.
-   - Returns a structured JSON response with analysis results.
+- Inspects metadata, indexing directives, social preview tags, declared icons, and structured data JSON syntax.
+- Checks image alt attributes, main headings, landmarks, image dimension attributes, HTML size, caching, HTTPS, and security headers.
+- Requests robots.txt, sitemap.xml, and /.well-known/security.txt concurrently and verifies recognizable content.
+- Provides category navigation, search, status filters, detected values, retry, rerun, and JSON export.
+- Stores the five most recent successful checks in browser local storage. Clear history from the home page. Revisiting a check runs it again.
+- Offers an explicitly labeled sample report at `/analyze?demo=true`. Sample data is separate from live results.
 
-2. **Frontend**:
-   - **Hero Section**: Highlights the app's purpose and features.
-   - **URL Form**: Allows users to input a website URL for analysis.
-   - **Results Page**: Displays a detailed report with collapsible sections for each category.
+## Scope and scoring
 
-3. **Styling**:
-   - Tailwind CSS is used for responsive design and modern UI elements.
-   - Custom gradients and glass morphism effects enhance the visual appeal.
+Inspectr reads server HTML without executing JavaScript. It does not measure Core Web Vitals, validate structured data semantics, crawl the entire website, or provide a complete accessibility or security audit. A check score is the percentage of checklist points earned: passed = 1, review = 0.5, fix = 0. Missing recommendations should be reviewed in the site's context.
 
-### Example Snippet
-#### API Route (`/api/analyze`)
-```typescript
-export async function GET(request: NextRequest) {
-  const url = request.nextUrl.searchParams.get('url');
-  if (!url) {
-    return NextResponse.json({ error: 'URL parameter is required' }, { status: 400 });
-  }
+Site file checks use conventional paths; a sitemap at another path may require manual verification. Requests ask for uncompressed content so the parser can inspect HTML; compression is not scored. The page response is capped at 2 MB and site files at 512 KB. Each request has a ten second deadline and allows four redirects. Redirect targets and DNS addresses are checked, and the HTTP connection is pinned to a validated public address. Local/private networks, credentials, nonstandard ports, and non-HTTP protocols are rejected.
 
-  try {
-    const response = await fetch(url);
-    const html = await response.text();
-    const $ = cheerio.load(html);
+The API is `/api/analyze?url=...`. Hosts may block automated requests, in which case the UI presents an actionable error instead of returning mock results. A public production deployment should also apply hosting-level rate limits appropriate to its traffic.
 
-    const title = $('title').text();
-    return NextResponse.json({ title });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-}
-```
+## Design and stack
 
-#### Frontend (`page.tsx`)
-```tsx
-<section className="relative px-4 md:px-6 py-20 md:py-32 overflow-hidden">
-  <div className="absolute inset-0 overflow-hidden">
-    <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl animate-float"></div>
-  </div>
-  <div className="container mx-auto relative">
-    <h1 className="text-4xl md:text-6xl font-bold">Ensure Your Website is Ready for Production</h1>
-  </div>
-</section>
-```
-
-## Contributing
-Contributions are welcome! Please fork the repository and submit a pull request.
-
-## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
-## Acknowledgments
-- [Next.js](https://nextjs.org)
-- [Cheerio](https://cheerio.js.org)
-- [Tailwind CSS](https://tailwindcss.com)
+Next.js 15, React 19, TypeScript, Tailwind CSS 4, and Cheerio. The UI uses Geist, light neutral surfaces, restrained green, semantic status colors, keyboard focus states, responsive layouts, and reduced motion support. Design direction is documented in PRODUCT.md and DESIGN.md.
